@@ -190,6 +190,10 @@ fun TaskListScreen(application: Application) {
                 TaskListItem(
                     item = item,
                     onDeleteClick = {tasksViewModel.deleteTask(item) },
+                    onTagClick =  {
+                        tag -> tagsFromButton = tag
+                        isSelectedTag = tag
+                                  },
                     tagsColors,
                     tags
                 )
@@ -382,6 +386,7 @@ fun TaskListScreen(application: Application) {
 fun TaskListItem(
     item: TasksDbEntity,
     onDeleteClick :() -> Unit,
+    onTagClick :(String) -> Unit,
     tagColors : List<Color>,
     tags : List<String>
 ){
@@ -453,6 +458,7 @@ fun TaskListItem(
                                 shape = RoundedCornerShape(20.dp)
                             )
                             .padding(8.dp, 4.dp)
+                            .clickable { onTagClick(tag) }
                     ){
                         Text(tag,
                             fontSize = 10.sp)
