@@ -1,0 +1,34 @@
+package com.example.taskmanagerver2
+
+import android.os.Bundle
+import androidx.activity.ComponentActivity
+import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.ui.Modifier
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.viewModelScope
+import com.example.taskmanagerver2.model.database.AppDatabase
+import com.example.taskmanagerver2.ui.theme.TaskManagerVer2Theme
+import com.example.taskmanagerver2.view.TaskListScreen
+import com.example.taskmanagerver2.viewmodel.TasksViewModel
+import kotlinx.coroutines.launch
+
+class MainActivity : ComponentActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContent {
+            TaskManagerVer2Theme {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    TaskListScreen(application = application)
+                }
+            }
+        }
+    }
+}
