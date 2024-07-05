@@ -11,24 +11,29 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.compose.rememberNavController
 import com.example.taskmanagerver2.model.database.AppDatabase
 import com.example.taskmanagerver2.ui.theme.TaskManagerVer2Theme
 import com.example.taskmanagerver2.view.TaskListScreen
+import com.example.taskmanagerver2.view.TaskManagerApp
 import com.example.taskmanagerver2.viewmodel.TasksViewModel
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
         setContent {
+            val navController = rememberNavController()
             TaskManagerVer2Theme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    TaskListScreen(application = application)
+                    TaskManagerApp(application = application, navController = navController)
                 }
             }
         }
     }
+
 }

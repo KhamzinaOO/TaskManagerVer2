@@ -69,7 +69,8 @@ class Tag(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TaskListScreen(application: Application) {
+fun TaskListScreen(application: Application,
+                   navigateToDetail: (TasksDbEntity) -> Unit) {
     val tasksViewModel: TasksViewModel = viewModel(factory = TasksViewModelFactory(application))
 
     var statusFromButton by remember { mutableStateOf("") }
@@ -195,7 +196,8 @@ fun TaskListScreen(application: Application) {
                         isSelectedTag = tag
                                   },
                     tagsColors,
-                    tags
+                    tags,
+                    navigateToDetail
                 )
             }
         }
@@ -388,7 +390,8 @@ fun TaskListItem(
     onDeleteClick :() -> Unit,
     onTagClick :(String) -> Unit,
     tagColors : List<Color>,
-    tags : List<String>
+    tags : List<String>,
+    navigateToDetail: (TasksDbEntity) -> Unit
 ){
 
     var lines by remember { mutableIntStateOf(1) }
@@ -401,6 +404,10 @@ fun TaskListItem(
                 shape = RoundedCornerShape(20.dp)
             )
             .fillMaxWidth()
+            .clickable {
+                navigateToDetail(item)
+            }
+
 
     ){
         Row(
