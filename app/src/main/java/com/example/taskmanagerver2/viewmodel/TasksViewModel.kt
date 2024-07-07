@@ -39,16 +39,19 @@ class TasksViewModel(application: Application) : AndroidViewModel(application) {
         emit(tags)
     }
 
-    fun getTasksByStatus(status : String): LiveData<List<TasksDbEntity>>{
-        val tasks = repository.getTaskByStatus(status)
-        return(tasks)
+    fun getTasksByStatus(status: String): LiveData<List<TasksDbEntity>> = repository.getTaskByStatus(status)
+
+    fun getTasksByTag(tag: String): LiveData<List<TasksDbEntity>> = repository.getTaskByTag(tag)
+
+    fun getCountByStatus(status: String): LiveData<Int> = liveData {
+        val count = repository.getCountByStatus(status)
+        emit(count)
     }
 
-    fun getTasksByTag(tag : String): LiveData<List<TasksDbEntity>>{
-        val tasks = repository.getTaskByTag(tag)
-        return(tasks)
+    fun getCount(): LiveData<Int> = liveData {
+        val count = repository.getCount()
+        emit(count)
     }
-
 
     fun showDialog(show: Boolean) {
         _isDialogVisible.value = show

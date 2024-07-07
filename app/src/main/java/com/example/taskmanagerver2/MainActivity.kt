@@ -14,6 +14,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.compose.rememberNavController
 import com.example.taskmanagerver2.model.database.AppDatabase
 import com.example.taskmanagerver2.ui.theme.TaskManagerVer2Theme
+import com.example.taskmanagerver2.view.DashboardScreen
 import com.example.taskmanagerver2.view.TaskListScreen
 import com.example.taskmanagerver2.view.TaskManagerApp
 import com.example.taskmanagerver2.viewmodel.TasksViewModel
@@ -31,6 +32,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     TaskManagerApp(application = application, navController = navController)
+                    //DashboardScreen(application = application)
                 }
             }
         }

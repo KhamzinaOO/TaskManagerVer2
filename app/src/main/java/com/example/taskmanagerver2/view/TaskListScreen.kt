@@ -11,13 +11,19 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -57,6 +63,7 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.taskmanagerver2.model.TagAndColor
 import com.example.taskmanagerver2.model.database.TasksDbEntity
 import com.example.taskmanagerver2.viewmodel.TasksViewModel
 import com.example.taskmanagerver2.viewmodel.TasksViewModelFactory
@@ -70,10 +77,11 @@ class Tag(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TaskListScreen(application: Application,
-                   navigateToDetail: (TasksDbEntity) -> Unit) {
+                   navigateToDetail: (TasksDbEntity) -> Unit,
+                   statusFromDashboard : String) {
     val tasksViewModel: TasksViewModel = viewModel(factory = TasksViewModelFactory(application))
 
-    var statusFromButton by remember { mutableStateOf("") }
+    var statusFromButton by remember { mutableStateOf(statusFromDashboard) }
     var tagsFromButton by remember { mutableStateOf("") }
 
     val taskList by tasksViewModel.allTasks.observeAsState(emptyList())
@@ -84,15 +92,31 @@ fun TaskListScreen(application: Application,
     var itemName by remember { mutableStateOf("") }
     var itemContent by remember { mutableStateOf("") }
     var deadline: Date? by remember { mutableStateOf(null) }
-    var status by remember { mutableStateOf("В процессе") }
-    var tagsList = remember { mutableStateListOf<String>()}
+    var status by remember { mutableStateOf("В работе") }
+    val tagsList = remember { mutableStateListOf<String>()}
     var showDialog by remember { mutableStateOf(false) }
     var tagExpanded by remember { mutableStateOf(false) }
     var statusExpanded by remember { mutableStateOf(false) }
 
-    val statuses = listOf("Завершено", "В процессе", "Отложено")
-    val tagsColors = listOf(Color(0xffffe5d9), Color(0xffd8e2dc), Color(0xffffcad4), Color.Gray)
-    val tags = listOf("работа", "встреча", "срочно", "none")
+    val statusColorList = listOf(
+        TagAndColor("Не начато",Color(0xffC3C1EB)),
+        TagAndColor("В работе",Color(0xffD4B0D0)),
+        TagAndColor("Завершено",Color(0xff8FBB99)),
+        TagAndColor("На проверке",Color(0xffCBDFBD)),
+        TagAndColor("Отложено",Color(0xff8DA5B9)),
+        TagAndColor("Отменено",Color(0xffFAE588)),
+        TagAndColor("Просрочено",Color(0xffDB5461))
+    )
+
+    val tagColorList = listOf(
+        TagAndColor("работа",Color(0xffffe5d9)),
+        TagAndColor("встреча",Color(0xffd8e2dc)),
+        TagAndColor("срочно",Color(0xffC08497)),
+        TagAndColor("бессрочно",Color(0xffECE4DB)),
+        TagAndColor("совещание",Color(0xffd8e8fd)),
+        TagAndColor("ТЗ",Color(0xff947391)),
+        TagAndColor("none",Color(0xffc4cdc8))
+    )
 
     Column(
         modifier = Modifier
@@ -108,25 +132,25 @@ fun TaskListScreen(application: Application,
             Text("Добавить задачу")
         }
 
-        var selectedStatus by remember { mutableStateOf("") }
+        var selectedStatus by remember { mutableStateOf(statusFromDashboard) }
         LazyRow(
             modifier = Modifier
                 .padding(8.dp, 0.dp)
                 .fillMaxWidth(),
             horizontalArrangement = Arrangement.Center
         ) {
-            items(statuses) { item ->
+            items(statusColorList) { item ->
                 FilterChip(
                     modifier = Modifier.padding(3.dp),
                     onClick = {
-                        selectedStatus = if(selectedStatus == item) "" else item
-                        statusFromButton = if (selectedStatus == item) item else ""
+                        selectedStatus = if(selectedStatus == item.name) "" else item.name
+                        statusFromButton = if (selectedStatus == item.name) item.name else ""
                     },
                     label = {
-                        Text(item)
+                        Text(item.name)
                     },
-                    selected = selectedStatus == item,
-                    leadingIcon = if (selectedStatus == item) {
+                    selected = selectedStatus == item.name,
+                    leadingIcon = if (selectedStatus == item.name) {
                         {
                             Icon(
                                 imageVector = Icons.Filled.Done,
@@ -137,11 +161,7 @@ fun TaskListScreen(application: Application,
                     } else {
                         null
                     },
-                    colors = FilterChipDefaults.filterChipColors(selectedContainerColor = when (item) {
-                        "Завершено" -> Color(0xFFf4acb7)
-                        "В процессе" -> Color(0xFFc2d6c4)
-                        else -> Color(0xFFeaebef)
-                    },)
+                    colors = FilterChipDefaults.filterChipColors(selectedContainerColor = item.color)
                 )
             }
         }
@@ -153,18 +173,18 @@ fun TaskListScreen(application: Application,
                 .fillMaxWidth(),
             horizontalArrangement = Arrangement.Center
         ) {
-            items(tags) { item ->
+            items(tagColorList) { item ->
                 FilterChip(
                     modifier = Modifier.padding(3.dp),
                     onClick = {
-                        isSelectedTag = if(isSelectedTag == item) "" else item
-                        tagsFromButton = if (isSelectedTag == item) item else ""
+                        isSelectedTag = if(isSelectedTag == item.name) "" else item.name
+                        tagsFromButton = if (isSelectedTag == item.name) item.name else ""
                     },
                     label = {
-                        Text(item)
+                        Text(item.name)
                     },
-                    selected = isSelectedTag == item,
-                    leadingIcon = if (isSelectedTag == item) {
+                    selected = isSelectedTag == item.name,
+                    leadingIcon = if (isSelectedTag == item.name) {
                         {
                             Icon(
                                 imageVector = Icons.Filled.Done,
@@ -175,7 +195,7 @@ fun TaskListScreen(application: Application,
                     } else {
                         null
                     },
-                    colors = FilterChipDefaults.filterChipColors(selectedContainerColor = tagsColors[tags.indexOf(item)])
+                    colors = FilterChipDefaults.filterChipColors(selectedContainerColor = item.color)
                 )
             }
         }
@@ -195,8 +215,8 @@ fun TaskListScreen(application: Application,
                         tag -> tagsFromButton = tag
                         isSelectedTag = tag
                                   },
-                    tagsColors,
-                    tags,
+                    tagColorList,
+                    statusColorList,
                     navigateToDetail
                 )
             }
@@ -283,18 +303,35 @@ fun TaskListScreen(application: Application,
                             ){
                                 Text("Тэги: ",
                                     fontSize = 16.sp)
-                                Row(){
-                                    for (item in tagsList){
-                                        OutlinedButton(onClick = { tagsList.remove(item)},
-                                            modifier = Modifier
-                                                .size(50.dp, 20.dp),
-                                            contentPadding = PaddingValues(0.dp),
-                                            colors = ButtonDefaults.buttonColors(containerColor = tagsColors[tags.indexOf(item)])
-                                                ) {
-                                            Text(text = item,
-                                                fontSize = 7.sp,
-                                                fontWeight = FontWeight.Bold,
-                                                color = Color.Black)
+
+                                val columns = 2
+
+                                LazyVerticalGrid(
+                                    columns = GridCells.Fixed(columns),
+                                    contentPadding = PaddingValues(1.dp),
+                                    verticalArrangement = Arrangement.spacedBy(1.dp),
+                                    horizontalArrangement = Arrangement.spacedBy(1.dp),
+                                    modifier = Modifier.width(150.dp)
+                                ) {
+                                    items(tagsList) { item ->
+                                        tagColorList.find { it.name == item }?.color?.let { color ->
+                                            OutlinedButton(
+                                                onClick = { tagsList.remove(item) },
+                                                modifier = Modifier
+                                                    .wrapContentSize()
+                                                    .defaultMinSize(minHeight = 20.dp),
+                                                contentPadding = PaddingValues(0.dp),
+                                                colors = ButtonDefaults.buttonColors(
+                                                    containerColor = color
+                                                )
+                                            ) {
+                                                Text(
+                                                    text = item,
+                                                    fontSize = 12.sp,
+                                                    color = Color.Black,
+                                                    modifier = Modifier.padding(1.dp)
+                                                )
+                                            }
                                         }
                                     }
                                 }
@@ -307,30 +344,16 @@ fun TaskListScreen(application: Application,
                                 onDismissRequest = { tagExpanded = false },
                                 offset = DpOffset(x = 150.dp, y = 0.dp)
                             ) {
-                                DropdownMenuItem(
-                                    text = { Text(tags[0], fontSize=18.sp, modifier = Modifier.padding(10.dp)) },
-                                    onClick = {
-                                        if(!tagsList.contains(tags[0])){
-                                            tagsList.add(tags[0])
+                                for(item in tagColorList.dropLast(1)){
+                                    DropdownMenuItem(
+                                        text = { Text(item.name, fontSize=18.sp, modifier = Modifier.padding(10.dp)) },
+                                        onClick = {
+                                            if(!tagsList.contains(item.name)){
+                                                tagsList.add(item.name)
+                                            }
                                         }
-                                    }
-                                )
-                                DropdownMenuItem(
-                                    text = { Text(tags[1], fontSize=18.sp, modifier = Modifier.padding(10.dp)) },
-                                    onClick = {
-                                        if(!tagsList.contains(tags[1])){
-                                            tagsList.add(tags[1])
-                                        }
-                                    }
-                                )
-                                DropdownMenuItem(
-                                    text = { Text(tags[2], fontSize=18.sp, modifier = Modifier.padding(10.dp)) },
-                                    onClick = {
-                                        if(!tagsList.contains(tags[2])){
-                                            tagsList.add(tags[2])
-                                        }
-                                    }
-                                )
+                                    )
+                                }
                             }
                         }
                         Box {
@@ -362,18 +385,12 @@ fun TaskListScreen(application: Application,
                                 onDismissRequest = { statusExpanded = false },
                                 offset = DpOffset(x = 130.dp, y = 0.dp)
                             ) {
-                                DropdownMenuItem(
-                                    text = { Text(statuses[0], fontSize=18.sp, modifier = Modifier.padding(10.dp)) },
-                                    onClick = { status = statuses[0] }
-                                )
-                                DropdownMenuItem(
-                                    text = { Text(statuses[1], fontSize=18.sp, modifier = Modifier.padding(10.dp)) },
-                                    onClick = { status = statuses[1] }
-                                )
-                                DropdownMenuItem(
-                                    text = { Text(statuses[2], fontSize=18.sp, modifier = Modifier.padding(10.dp)) },
-                                    onClick = { status = statuses[2] }
-                                )
+                                for(item in statusColorList){
+                                    DropdownMenuItem(
+                                        text = { Text(item.name, fontSize=18.sp, modifier = Modifier.padding(10.dp)) },
+                                        onClick = { status = item.name }
+                                    )
+                                }
                             }
                         }
 
@@ -389,8 +406,8 @@ fun TaskListItem(
     item: TasksDbEntity,
     onDeleteClick :() -> Unit,
     onTagClick :(String) -> Unit,
-    tagColors : List<Color>,
-    tags : List<String>,
+    tagColorList : List<TagAndColor>,
+    statusColorList : List<TagAndColor>,
     navigateToDetail: (TasksDbEntity) -> Unit
 ){
 
@@ -414,31 +431,31 @@ fun TaskListItem(
             horizontalArrangement = Arrangement.SpaceBetween
         ){
             Row(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ){
                 Text(text = item.title,
                     modifier = Modifier.padding(start = 16.dp),)
-            Row(
-                modifier = Modifier
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-                    .background(
-                        color = when (item.status) {
-                            "Завершено" -> Color(0xFFf4acb7)
-                            "В процессе" -> Color(0xFFc2d6c4)
-                            else -> Color(0xFFeaebef)
-                        },
-                        shape = RoundedCornerShape(20.dp)
-                    )
-                    .padding(4.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    item.status,
-                    fontSize = 12.sp
-                )
-            }
+                statusColorList.find { it.name==item.status }?.color?.let {
+                    Modifier
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .background(
+                            color = it,
+                            shape = RoundedCornerShape(20.dp)
+                        )
+                        .padding(4.dp)
+                }?.let {
+                    Row(
+                        modifier = it,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            item.status,
+                            fontSize = 12.sp
+                        )
+                    }
+                }
         }
 
         }
@@ -453,11 +470,11 @@ fun TaskListItem(
             ){
                 val tagsList = item.tag.split(",").map { it.trim() }
                 for (tag in tagsList){
-                    Box(
-                        modifier = Modifier
+                    tagColorList.find { it.name == tag }?.let {
+                        Modifier
                             .padding(start = 2.dp)
                             .background(
-                                color = tagColors[tags.indexOf(tag)],
+                                color = it.color,
                                 shape = RoundedCornerShape(20.dp)
                             )
                             .border(
@@ -466,9 +483,13 @@ fun TaskListItem(
                             )
                             .padding(8.dp, 4.dp)
                             .clickable { onTagClick(tag) }
-                    ){
-                        Text(tag,
-                            fontSize = 10.sp)
+                    }?.let {
+                        Box(
+                            modifier = it
+                        ){
+                            Text(tag,
+                                fontSize = 10.sp)
+                        }
                     }
                 }
             }
@@ -492,7 +513,7 @@ fun TaskListItem(
         }
 
         Row(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ){
@@ -500,7 +521,7 @@ fun TaskListItem(
                 text = item.content,
                 textAlign = TextAlign.Left,
                 modifier = Modifier
-                    .fillMaxSize()
+                    .fillMaxWidth()
                     .padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
                 maxLines = lines,
                 overflow = TextOverflow.Ellipsis,

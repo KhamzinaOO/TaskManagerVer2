@@ -28,12 +28,20 @@ interface TasksDao {
     fun getAllTasks(): LiveData<List<TasksDbEntity>>
 
     @Transaction
+    @Query("SELECT COUNT(*) FROM Tasks")
+    suspend fun getCount(): Int
+
+    @Transaction
     @Query("SELECT status FROM Tasks WHERE taskId = :id LIMIT 1")
     suspend fun getStatus(id: Int): String?
 
     @Transaction
     @Query("SELECT * FROM Tasks WHERE status = :status")
     fun getTaskByStatus(status: String): LiveData<List<TasksDbEntity>>
+
+    @Transaction
+    @Query("SELECT COUNT(*) FROM Tasks WHERE status = :status")
+    suspend fun getCountByStatus(status: String): Int
 
     @Transaction
     @Query("SELECT * FROM Tasks WHERE instr(Tasks.tag, :tag)>0")
