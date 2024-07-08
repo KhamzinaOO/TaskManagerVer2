@@ -42,6 +42,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.taskmanagerver2.model.Constants
 import com.example.taskmanagerver2.model.TagAndColor
 import com.example.taskmanagerver2.model.database.TasksDbEntity
 import com.example.taskmanagerver2.viewmodel.TasksViewModel
@@ -56,25 +57,8 @@ fun DashboardScreen(application: Application,
     val tasksViewModel: TasksViewModel = viewModel(factory = TasksViewModelFactory(application))
     val importantTasks by tasksViewModel.getTasksByTag("срочно").observeAsState(emptyList())
 
-    val statusColorList = listOf(
-        TagAndColor("В работе",Color(0xffD4B0D0)),
-        TagAndColor("Не начато",Color(0xffC3C1EB)),
-        TagAndColor("Завершено",Color(0xff8FBB99)),
-        TagAndColor("На проверке",Color(0xffCBDFBD)),
-        TagAndColor("Отложено",Color(0xff8DA5B9)),
-        TagAndColor("Отменено",Color(0xffFAE588)),
-        TagAndColor("Просрочено",Color(0xffDB5461)),
-        TagAndColor("Все",Color.White)
-    )
-
-    val tagColorList = listOf(
-        TagAndColor("работа",Color(0xffffe5d9)),
-        TagAndColor("встреча",Color(0xffd8e2dc)),
-        TagAndColor("срочно",Color(0xffC08497)),
-        TagAndColor("бессрочно",Color(0xffECE4DB)),
-        TagAndColor("совещание",Color(0xffd8e8fd)),
-        TagAndColor("ТЗ",Color(0xff947391))
-    )
+    val statusColorList = Constants.statusColorList + TagAndColor("Все",Color.White)
+    val tagColorList = Constants.tagColorList
 
     val itemHeight = 80.dp
 
