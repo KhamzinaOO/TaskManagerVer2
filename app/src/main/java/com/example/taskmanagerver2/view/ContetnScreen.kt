@@ -1,6 +1,7 @@
 package com.example.taskmanagerver2.view
 
 import android.app.Application
+import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -39,11 +40,13 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
@@ -55,12 +58,20 @@ import com.example.taskmanagerver2.model.TagAndColor
 import com.example.taskmanagerver2.model.database.TasksDbEntity
 import com.example.taskmanagerver2.viewmodel.TasksViewModel
 import com.example.taskmanagerver2.viewmodel.TasksViewModelFactory
+import com.google.gson.Gson
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
+import java.io.FileOutputStream
 import java.util.Date
 
 @Composable
-fun ContentScreen(application: Application, item : TasksDbEntity,
-                  navigateToList :() ->Unit){
-
+fun ContentScreen(
+    application: Application,
+    item: TasksDbEntity,
+    navigateToList: () -> Unit
+) {
     val navController = rememberNavController()
     val tasksViewModel: TasksViewModel = viewModel(factory = TasksViewModelFactory(application))
 
@@ -86,27 +97,46 @@ fun ContentScreen(application: Application, item : TasksDbEntity,
     }
 
     val statusColorList = listOf(
-        TagAndColor("Не начато",Color(0xffC3C1EB)),
-        TagAndColor("В работе",Color(0xffD4B0D0)),
-        TagAndColor("Завершено",Color(0xff8FBB99)),
-        TagAndColor("На проверке",Color(0xffCBDFBD)),
-        TagAndColor("Отложено",Color(0xff8DA5B9)),
-        TagAndColor("Отменено",Color(0xffFAE588)),
-        TagAndColor("Просрочено",Color(0xffDB5461))
+        TagAndColor("Не начато", Color(0xffC3C1EB)),
+        TagAndColor("В работе", Color(0xffD4B0D0)),
+        TagAndColor("Завершено", Color(0xff8FBB99)),
+        TagAndColor("На проверке", Color(0xffCBDFBD)),
+        TagAndColor("Отложено", Color(0xff8DA5B9)),
+        TagAndColor("Отменено", Color(0xffFAE588)),
+        TagAndColor("Просрочено", Color(0xffDB5461))
     )
 
     val tagColorList = listOf(
-        TagAndColor("работа",Color(0xffffe5d9)),
-        TagAndColor("встреча",Color(0xffd8e2dc)),
-        TagAndColor("срочно",Color(0xffC08497)),
-        TagAndColor("бессрочно",Color(0xffECE4DB)),
-        TagAndColor("совещание",Color(0xffd8e8fd)),
-        TagAndColor("ТЗ",Color(0xff947391)),
-        TagAndColor("none",Color(0xffc4cdc8))
+        TagAndColor("работа", Color(0xffffe5d9)),
+        TagAndColor("встреча", Color(0xffd8e2dc)),
+        TagAndColor("срочно", Color(0xffC08497)),
+        TagAndColor("бессрочно", Color(0xffECE4DB)),
+        TagAndColor("совещание", Color(0xffd8e8fd)),
+        TagAndColor("ТЗ", Color(0xff947391)),
+        TagAndColor("none", Color(0xffc4cdc8))
     )
 
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+
+    val jsonString = remember {
+        Gson().toJson(item)
+    }
+
+    var isSuccess by remember { mutableStateOf<Boolean?>(null) }
+
+    LaunchedEffect(isSuccess) {
+        isSuccess?.let {
+            Toast.makeText(
+                context,
+                if (it) "File saved successfully" else "File save failed",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
+
     Column(
-        modifier = Modifier.padding(8.dp, top=80.dp, 8.dp),
+        modifier = Modifier.padding(8.dp, top = 80.dp, bottom = 8.dp)
     ) {
         OutlinedTextField(
             value = itemName,
@@ -190,7 +220,7 @@ fun ContentScreen(application: Application, item : TasksDbEntity,
             DropdownMenu(
                 expanded = tagExpanded,
                 onDismissRequest = { tagExpanded = false },
-                offset = DpOffset(x = 150.dp, y = 0.dp)
+                offset = DpOffset(x = 195.dp, y = (-80).dp)
             ) {
                 for (item in tagColorList.dropLast(1)) {
                     DropdownMenuItem(
@@ -243,7 +273,7 @@ fun ContentScreen(application: Application, item : TasksDbEntity,
             DropdownMenu(
                 expanded = statusExpanded,
                 onDismissRequest = { statusExpanded = false },
-                offset = DpOffset(x = 130.dp, y = 0.dp)
+                offset = DpOffset(x = 185.dp, y = (-80).dp)
             ) {
                 for (item in statusColorList) {
                     DropdownMenuItem(
@@ -262,15 +292,17 @@ fun ContentScreen(application: Application, item : TasksDbEntity,
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceAround
-        ){
+        ) {
             Button(onClick = {
-                tasksViewModel.insertTask(TasksDbEntity(
-                    taskId = item.taskId,
-                    title = itemName,
-                    content = itemContent,
-                    status = status,
-                    tag = if(tagsList.isNotEmpty()) tagsList.joinToString(separator = ",") else "none"
-                ))
+                tasksViewModel.insertTask(
+                    TasksDbEntity(
+                        taskId = item.taskId,
+                        title = itemName,
+                        content = itemContent,
+                        status = status,
+                        tag = if (tagsList.isNotEmpty()) tagsList.joinToString(separator = ",") else "none"
+                    )
+                )
                 Toast.makeText(application, "задача изменена", Toast.LENGTH_LONG).show()
             }) {
                 Text(text = "Изменить")
@@ -281,6 +313,28 @@ fun ContentScreen(application: Application, item : TasksDbEntity,
             }) {
                 Text(text = "Удалить")
             }
+            Button(onClick = {
+                coroutineScope.launch {
+                    isSuccess = saveTextToFile(context, "${itemName}.txt", jsonString)
+                }
+            }) {
+                Text("Save to File")
+            }
+        }
+    }
+}
+
+suspend fun saveTextToFile(context: Context, filename: String, content: String): Boolean {
+    return withContext(Dispatchers.IO) {
+        try {
+            val file = File(context.filesDir, filename)
+            FileOutputStream(file).use {
+                it.write(content.toByteArray())
+            }
+            true
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
         }
     }
 }

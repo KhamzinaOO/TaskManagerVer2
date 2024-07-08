@@ -64,6 +64,7 @@ dependencies {
 
     implementation("org.jetbrains.kotlin:kotlin-stdlib:1.9.20")
 
+    implementation("com.google.code.gson:gson:2.8.8")
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
