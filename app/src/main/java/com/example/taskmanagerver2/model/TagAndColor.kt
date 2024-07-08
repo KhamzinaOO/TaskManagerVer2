@@ -22,7 +22,7 @@ object Constants {
         TagAndColor("работа",Color(0xffffe5d9)),
         TagAndColor("встреча",Color(0xffd8e2dc)),
         TagAndColor("срочно",Color(0xffC08497)),
-        TagAndColor("бессрочно",Color(0xffECE4DB)),
+        TagAndColor("без срока",Color(0xffECE4DB)),
         TagAndColor("совещание",Color(0xffd8e8fd)),
         TagAndColor("ТЗ",Color(0xff947391)),
         TagAndColor("none",Color(0xffc4cdc8))

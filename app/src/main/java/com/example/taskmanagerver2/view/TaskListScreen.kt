@@ -12,19 +12,28 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.defaultMinSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.items
+import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
@@ -211,17 +220,17 @@ fun TaskListScreen(application: Application,
             AlertDialog(
                 onDismissRequest = {
                     showDialog = false
-                    status = "В процессе"
+                    status = "В работе"
                     tagsList.removeAll(tagsList)
                                    },
                 confirmButton = {
                     Row(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(8.dp),
-                        horizontalArrangement = Arrangement.SpaceBetween
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceAround
                     ) {
-                        Button(onClick = {
+                        Button(
+                            onClick = {
                             if (itemName.isNotBlank() || itemContent.isNotBlank()) {
                                 tasksViewModel.insertTask(
                                     TasksDbEntity(
@@ -234,7 +243,7 @@ fun TaskListScreen(application: Application,
                                 showDialog = false
                                 itemName = ""
                                 itemContent = ""
-                                status = "В процессе"
+                                status = "В работе"
                                 tagsList.removeAll(tagsList)
                             }
                         }) {
@@ -291,30 +300,31 @@ fun TaskListScreen(application: Application,
 
                                 val columns = 2
 
-                                LazyVerticalGrid(
-                                    columns = GridCells.Fixed(columns),
-                                    contentPadding = PaddingValues(1.dp),
-                                    verticalArrangement = Arrangement.spacedBy(1.dp),
-                                    horizontalArrangement = Arrangement.spacedBy(1.dp),
-                                    modifier = Modifier.width(150.dp)
+                                LazyVerticalStaggeredGrid(
+                                    columns = StaggeredGridCells.Fixed(columns),
+                                    modifier = Modifier.width(155.dp),
                                 ) {
                                     items(tagsList) { item ->
                                         tagColorList.find { it.name == item }?.color?.let { color ->
-                                            OutlinedButton(
-                                                onClick = { tagsList.remove(item) },
+                                            Box(
                                                 modifier = Modifier
-                                                    .wrapContentSize()
-                                                    .defaultMinSize(minHeight = 20.dp),
-                                                contentPadding = PaddingValues(0.dp),
-                                                colors = ButtonDefaults.buttonColors(
-                                                    containerColor = color
-                                                )
+                                                    .padding(1.dp)
+                                                    .background(
+                                                        color = color,
+                                                        shape = RoundedCornerShape(20.dp)
+                                                    )
+                                                    .border(
+                                                        border = BorderStroke(1.dp, Color.DarkGray),
+                                                        shape = RoundedCornerShape(20.dp)
+                                                    )
+                                                    .padding(8.dp, 4.dp)
+                                                    .wrapContentWidth()
+                                                    .clickable { tagsList.remove(item) },
+                                                contentAlignment = Alignment.Center
                                             ) {
                                                 Text(
-                                                    text = item,
-                                                    fontSize = 12.sp,
-                                                    color = Color.Black,
-                                                    modifier = Modifier.padding(1.dp)
+                                                    item,
+                                                    fontSize = 10.sp
                                                 )
                                             }
                                         }
@@ -389,13 +399,12 @@ fun TaskListScreen(application: Application,
 @Composable
 fun TaskListItem(
     item: TasksDbEntity,
-    onDeleteClick :() -> Unit,
-    onTagClick :(String) -> Unit,
-    tagColorList : List<TagAndColor>,
-    statusColorList : List<TagAndColor>,
+    onDeleteClick: () -> Unit,
+    onTagClick: (String) -> Unit,
+    tagColorList: List<TagAndColor>,
+    statusColorList: List<TagAndColor>,
     navigateToDetail: (TasksDbEntity) -> Unit
-){
-
+) {
     var lines by remember { mutableIntStateOf(1) }
     var arrowIcon by remember { mutableStateOf(Icons.Default.KeyboardArrowDown) }
     Column(
@@ -409,99 +418,106 @@ fun TaskListItem(
             .clickable {
                 navigateToDetail(item)
             }
-
-
-    ){
+    ) {
         Row(
-            horizontalArrangement = Arrangement.SpaceBetween
-        ){
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ){
-                Text(text = item.title,
-                    modifier = Modifier.padding(start = 16.dp),)
-                statusColorList.find { it.name==item.status }?.color?.let {
-                    Modifier
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                        .background(
-                            color = it,
-                            shape = RoundedCornerShape(20.dp)
-                        )
-                        .padding(4.dp)
-                }?.let {
-                    Row(
-                        modifier = it,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            item.status,
-                            fontSize = 12.sp
-                        )
-                    }
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = item.title,
+                modifier = Modifier.padding(start = 16.dp)
+            )
+            statusColorList.find { it.name == item.status }?.color?.let {
+                Modifier
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+                    .background(
+                        color = it,
+                        shape = RoundedCornerShape(20.dp)
+                    )
+                    .padding(4.dp)
+            }?.let {
+                Row(
+                    modifier = it,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        item.status,
+                        fontSize = 12.sp
+                    )
                 }
-        }
-
+            }
         }
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
-        ){
-            Row(
-                modifier = Modifier.padding(start = 16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ){
-                val tagsList = item.tag.split(",").map { it.trim() }
-                for (tag in tagsList){
-                    tagColorList.find { it.name == tag }?.let {
-                        Modifier
-                            .padding(start = 2.dp)
-                            .background(
-                                color = it.color,
-                                shape = RoundedCornerShape(20.dp)
-                            )
-                            .border(
-                                border = BorderStroke(1.dp, Color.DarkGray),
-                                shape = RoundedCornerShape(20.dp)
-                            )
-                            .padding(8.dp, 4.dp)
-                            .clickable { onTagClick(tag) }
-                    }?.let {
-                        Box(
-                            modifier = it
-                        ){
-                            Text(tag,
-                                fontSize = 10.sp)
+        ) {
+            val tagsList = item.tag.split(",").map { it.trim() }
+            val gridState = rememberLazyStaggeredGridState()
+
+            Box(
+                modifier = Modifier
+                    .padding(start = 16.dp)
+                    .width(180.dp)
+                    .heightIn(30.dp, 100.dp)
+            ) {
+                LazyVerticalStaggeredGrid(
+                    columns = StaggeredGridCells.Fixed(2),
+                    modifier = Modifier.wrapContentWidth(),
+                    state = gridState,
+                    horizontalArrangement = Arrangement.Start,
+                    verticalItemSpacing = 2.dp,
+                ) {
+                    items(tagsList) { tag ->
+                        tagColorList.find { it.name == tag }?.let { tagColor ->
+                            Box(
+                                modifier = Modifier
+                                    .padding(2.dp)
+                                    .background(
+                                        color = tagColor.color,
+                                        shape = RoundedCornerShape(20.dp)
+                                    )
+                                    .border(
+                                        border = BorderStroke(1.dp, Color.DarkGray),
+                                        shape = RoundedCornerShape(20.dp)
+                                    )
+                                    .padding(8.dp, 4.dp)
+                                    .clickable { onTagClick(tag) },
+                                    contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    tag,
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
                         }
                     }
                 }
             }
-            Row(
-            ){
+            Row {
                 IconButton(onClick = { onDeleteClick() }) {
                     Icon(imageVector = Icons.Default.Delete, contentDescription = "delete")
                 }
                 IconButton(onClick = {
-                    if (lines ==1){
+                    if (lines == 1) {
                         lines = 50
-                        arrowIcon=Icons.Default.KeyboardArrowUp
-                    }else{
+                        arrowIcon = Icons.Default.KeyboardArrowUp
+                    } else {
                         lines = 1
-                        arrowIcon=Icons.Default.KeyboardArrowDown
+                        arrowIcon = Icons.Default.KeyboardArrowDown
                     }
                 }) {
                     Icon(imageVector = arrowIcon, contentDescription = "")
                 }
             }
         }
-
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
-        ){
+        ) {
             Text(
                 text = item.content,
                 textAlign = TextAlign.Left,
@@ -512,9 +528,6 @@ fun TaskListItem(
                 overflow = TextOverflow.Ellipsis,
                 fontSize = 12.sp
             )
-        }
-        Row(){
-
         }
     }
 }

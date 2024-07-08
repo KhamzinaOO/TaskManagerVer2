@@ -169,7 +169,7 @@ fun ContentScreen(
                     contentPadding = PaddingValues(1.dp),
                     verticalArrangement = Arrangement.spacedBy(1.dp),
                     horizontalArrangement = Arrangement.spacedBy(1.dp),
-                    modifier = Modifier.width(200.dp)
+                    modifier = Modifier.width(220.dp)
                 ) {
                     items(tagsList) { item ->
                         tagColorList.find { it.name == item }?.color?.let { color ->
@@ -178,7 +178,7 @@ fun ContentScreen(
                                 modifier = Modifier
                                     .padding(1.dp)
                                     .height(20.dp)
-                                    .width(50.dp),
+                                    .width(55.dp),
                                 contentPadding = PaddingValues(0.dp),
                                 colors = ButtonDefaults.buttonColors(
                                     containerColor = color
