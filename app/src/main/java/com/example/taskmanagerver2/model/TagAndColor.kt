@@ -25,6 +25,6 @@ object Constants {
         TagAndColor("без срока",Color(0xffECE4DB)),
         TagAndColor("совещание",Color(0xffd8e8fd)),
         TagAndColor("ТЗ",Color(0xff947391)),
-        TagAndColor("none",Color(0xffc4cdc8))
+        TagAndColor("none",Color(0xFFB6B6B6))
     )
 }
