@@ -1,5 +1,6 @@
 package com.example.taskmanagerver2
 
+import android.app.Application
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -40,7 +41,8 @@ class MainActivity : ComponentActivity() {
                 ) {
 
                     //TaskManagerApp(application = application, navController = navController)
-                    KanbanBoard(application = application, navigateToDetail = {})
+                    //KanbanBoard(application = application, navigateToDetail = {})
+                    MainScreen(application = application)
                 }
             }
         }
