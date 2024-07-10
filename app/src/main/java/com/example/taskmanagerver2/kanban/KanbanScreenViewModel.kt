@@ -31,30 +31,5 @@ class KanbanScreenViewModel : ViewModel() {
         val fromBoard = state.boards.find { it.items.contains(dropItem) } ?: return
 
         if (fromBoard == toBoard) return
-
-//        // Remove the item from the source board
-//        val updatedSourceBoard = fromBoard.copy(
-//            items = fromBoard.items.toMutableList().apply {
-//                remove(dropItem)
-//            }
-//        )
-//
-//        // Add the item to the destination board
-//        val updatedDestinationBoard = toBoard.copy(
-//            items = toBoard.items.toMutableList().apply {
-//                add(dropItem)
-//            }
-//        )
-//
-//        // Update the state with the changes
-//        state = state.copy(
-//            boards = state.boards.map { board ->
-//                when (board) {
-//                    fromBoard -> updatedSourceBoard
-//                    toBoard -> updatedDestinationBoard
-//                    else -> board
-//                }
-//            }
-//        )
     }
 }

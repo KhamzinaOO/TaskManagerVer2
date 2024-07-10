@@ -20,7 +20,6 @@ import com.example.taskmanagerver2.model.database.AppDatabase
 import com.example.taskmanagerver2.model.database.TasksDbEntity
 import com.example.taskmanagerver2.ui.theme.TaskManagerVer2Theme
 import com.example.taskmanagerver2.view.DashboardScreen
-import com.example.taskmanagerver2.view.KanbanBoard
 import com.example.taskmanagerver2.view.TaskListScreen
 import com.example.taskmanagerver2.view.TaskManagerApp
 import com.example.taskmanagerver2.viewmodel.TasksViewModel
@@ -35,8 +34,8 @@ class MainActivity : ComponentActivity() {
             TaskManagerVer2Theme {
                 Surface(
 
-                    modifier = Modifier.fillMaxSize()
-                        .padding(top=48.dp),
+                    modifier = Modifier.fillMaxSize(),
+//                        .padding(top=48.dp),
                     color = MaterialTheme.colorScheme.background
                 ) {
 
