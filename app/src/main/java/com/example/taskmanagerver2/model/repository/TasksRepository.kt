@@ -20,7 +20,6 @@ class TasksRepository(
     fun getTaskByStatus(status:String) = tasksDao.getTaskByStatus(status)
     suspend fun getCountByStatus(status: String) = tasksDao.getCountByStatus(status)
     suspend fun getCount() = tasksDao.getCount()
-//    suspend fun getTasksByStatus(statusId: Int) = tasksDao.getTasksByStatus(statusId)
 //    suspend fun getTasksByDate(date: Date) = tasksDao.getTasksByDate(date)
 
 }

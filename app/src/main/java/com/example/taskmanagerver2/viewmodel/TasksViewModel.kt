@@ -1,6 +1,7 @@
 package com.example.taskmanagerver2.viewmodel
 
 import android.app.Application
+import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -11,7 +12,11 @@ import androidx.lifecycle.viewModelScope
 import com.example.taskmanagerver2.model.database.AppDatabase
 import com.example.taskmanagerver2.model.database.TasksDbEntity
 import com.example.taskmanagerver2.model.repository.TasksRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
+import java.io.FileOutputStream
 import java.util.Date
 
 class TasksViewModel(application: Application) : AndroidViewModel(application) {
@@ -71,6 +76,21 @@ class TasksViewModel(application: Application) : AndroidViewModel(application) {
 
     fun deleteTaskById(id : Int) = viewModelScope.launch {
         repository.deleteTaskById(id)
+    }
+
+    suspend fun saveTextToFile(context: Context, filename: String, content: String): Boolean {
+        return withContext(Dispatchers.IO) {
+            try {
+                val file = File(context.filesDir, filename)
+                FileOutputStream(file).use {
+                    it.write(content.toByteArray())
+                }
+                true
+            } catch (e: Exception) {
+                e.printStackTrace()
+                false
+            }
+        }
     }
 }
 

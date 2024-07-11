@@ -1,6 +1,7 @@
 package com.example.taskmanagerver2
 
 import android.app.Application
+import android.content.pm.ActivityInfo
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
@@ -30,8 +31,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.taskmanagerver2.view.Components.SetOrientation
 import com.example.taskmanagerver2.model.Constants.statusColorList
 import com.example.taskmanagerver2.model.database.TasksDbEntity
+import com.example.taskmanagerver2.viewmodel.KanbanScreenViewModel
 import com.example.taskmanagerver2.viewmodel.TasksViewModel
 import com.example.taskmanagerver2.viewmodel.TasksViewModelFactory
 
@@ -39,6 +42,9 @@ import com.example.taskmanagerver2.viewmodel.TasksViewModelFactory
 @Composable
 fun KanbanScreen(application: Application,
                  navigateToDetail: (TasksDbEntity) -> Unit,) {
+
+    SetOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE)
+
     val tasksViewModel: TasksViewModel = viewModel(factory = TasksViewModelFactory(application))
     val viewModel: KanbanScreenViewModel = viewModel()
     val listState = rememberLazyListState()

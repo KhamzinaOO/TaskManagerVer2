@@ -1,10 +1,11 @@
-package com.example.taskmanagerver2
+package com.example.taskmanagerver2.viewmodel
 
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import com.example.taskmanagerver2.model.Board
 import com.example.taskmanagerver2.model.Constants.statusColorList
 import com.example.taskmanagerver2.model.database.TasksDbEntity
 

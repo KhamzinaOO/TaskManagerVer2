@@ -1,7 +1,6 @@
 package com.example.taskmanagerver2.view
 
 import android.app.Application
-import android.content.Context
 import android.widget.Toast
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -12,9 +11,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -22,7 +19,6 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowLeft
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
@@ -32,39 +28,29 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.compose.rememberNavController
-import androidx.room.ForeignKey
 import com.example.taskmanagerver2.model.Constants
-import com.example.taskmanagerver2.model.TagAndColor
 import com.example.taskmanagerver2.model.database.TasksDbEntity
+import com.example.taskmanagerver2.view.Components.DateTimePickerDialog
 import com.example.taskmanagerver2.viewmodel.TasksViewModel
 import com.example.taskmanagerver2.viewmodel.TasksViewModelFactory
 import com.google.gson.Gson
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.io.File
-import java.io.FileOutputStream
 import java.text.SimpleDateFormat
 import java.util.Date
 
@@ -74,22 +60,12 @@ fun ContentScreen(
     item: TasksDbEntity,
     navigateToList: () -> Unit
 ) {
-    val navController = rememberNavController()
     val tasksViewModel: TasksViewModel = viewModel(factory = TasksViewModelFactory(application))
-
-    var statusFromButton by remember { mutableStateOf("") }
-    var tagsFromButton by remember { mutableStateOf("") }
-
-    val taskList by tasksViewModel.allTasks.observeAsState(emptyList())
-    val tasksByStatus by tasksViewModel.getTasksByStatus(statusFromButton).observeAsState(emptyList())
-    val tasksByTag by tasksViewModel.getTasksByTag(tagsFromButton).observeAsState(emptyList())
 
     var itemName by remember { mutableStateOf(item.title) }
     var itemContent by remember { mutableStateOf(item.content) }
-    val deadline: Date? by remember { mutableStateOf(null) }
     var status by remember { mutableStateOf(item.status) }
     val tagsList = remember { mutableStateListOf<String>() }
-    var showDialog by remember { mutableStateOf(false) }
     var tagExpanded by remember { mutableStateOf(false) }
     var statusExpanded by remember { mutableStateOf(false) }
 
@@ -112,7 +88,7 @@ fun ContentScreen(
     var isSuccess by remember { mutableStateOf<Boolean?>(null) }
 
     var deadlineDialogShown by remember { mutableStateOf(false) }
-    var selectedDate by remember { mutableStateOf<Date?>(null) }
+    var selectedDate by remember { mutableStateOf<Date?>(item.deadline) }
 
     if (deadlineDialogShown) {
         DateTimePickerDialog(
@@ -344,7 +320,7 @@ fun ContentScreen(
             }
             Button(onClick = {
                 coroutineScope.launch {
-                    isSuccess = saveTextToFile(context, "${itemName}.txt", jsonString)
+                    isSuccess = tasksViewModel.saveTextToFile(context, "${itemName}.txt", jsonString)
                 }
             }) {
                 Text("Save to File")
@@ -353,17 +329,3 @@ fun ContentScreen(
     }
 }
 
-suspend fun saveTextToFile(context: Context, filename: String, content: String): Boolean {
-    return withContext(Dispatchers.IO) {
-        try {
-            val file = File(context.filesDir, filename)
-            FileOutputStream(file).use {
-                it.write(content.toByteArray())
-            }
-            true
-        } catch (e: Exception) {
-            e.printStackTrace()
-            false
-        }
-    }
-}

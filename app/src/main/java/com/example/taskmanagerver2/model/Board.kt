@@ -1,4 +1,4 @@
-package com.example.taskmanagerver2
+package com.example.taskmanagerver2.model
 
 import com.example.taskmanagerver2.model.database.TasksDbEntity
 
@@ -7,9 +7,3 @@ data class Board(
     val title: String,
     var items: List<TasksDbEntity>
 )
-//
-//data class BoardItem(
-//    val id: String,
-//    val title: String,
-//    val longText: String,
-//)
