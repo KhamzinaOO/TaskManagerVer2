@@ -1,6 +1,7 @@
 package com.example.taskmanagerver2.view
 
 import android.app.Application
+import android.content.pm.ActivityInfo
 import android.widget.Toast
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -47,6 +48,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.taskmanagerver2.model.Constants
 import com.example.taskmanagerver2.model.database.TasksDbEntity
 import com.example.taskmanagerver2.view.Components.DateTimePickerDialog
+import com.example.taskmanagerver2.view.Components.SetOrientation
 import com.example.taskmanagerver2.viewmodel.TasksViewModel
 import com.example.taskmanagerver2.viewmodel.TasksViewModelFactory
 import com.google.gson.Gson
@@ -60,6 +62,8 @@ fun ContentScreen(
     item: TasksDbEntity,
     navigateToList: () -> Unit
 ) {
+    SetOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
+
     val tasksViewModel: TasksViewModel = viewModel(factory = TasksViewModelFactory(application))
 
     var itemName by remember { mutableStateOf(item.title) }

@@ -1,6 +1,7 @@
 package com.example.taskmanagerver2.view
 
 import android.app.Application
+import android.content.pm.ActivityInfo
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -33,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.taskmanagerver2.model.Constants
 import com.example.taskmanagerver2.model.database.TasksDbEntity
+import com.example.taskmanagerver2.view.Components.SetOrientation
 import com.example.taskmanagerver2.view.Components.TaskDialog
 import com.example.taskmanagerver2.view.Components.TaskListItem
 import com.example.taskmanagerver2.viewmodel.TasksViewModel
@@ -44,6 +46,7 @@ import java.util.Date
 fun TaskListScreen(application: Application,
                    navigateToDetail: (TasksDbEntity) -> Unit,
                    statusFromDashboard : String) {
+    SetOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
     val tasksViewModel: TasksViewModel = viewModel(factory = TasksViewModelFactory(application))
 
     var statusFromButton by remember { mutableStateOf(statusFromDashboard) }

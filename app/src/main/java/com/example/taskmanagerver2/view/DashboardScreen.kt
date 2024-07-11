@@ -1,6 +1,7 @@
 package com.example.taskmanagerver2.view
 
 import android.app.Application
+import android.content.pm.ActivityInfo
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -28,6 +29,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.taskmanagerver2.model.Constants
 import com.example.taskmanagerver2.model.TagAndColor
 import com.example.taskmanagerver2.model.database.TasksDbEntity
+import com.example.taskmanagerver2.view.Components.SetOrientation
 import com.example.taskmanagerver2.view.Components.TaskListItem
 import com.example.taskmanagerver2.viewmodel.TasksViewModel
 import com.example.taskmanagerver2.viewmodel.TasksViewModelFactory
@@ -37,7 +39,7 @@ fun DashboardScreen(application: Application,
                     navigateToDetail: (TasksDbEntity) -> Unit,
                     navigateToStatus :(String)->Unit,
                     ){
-
+    SetOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
     val tasksViewModel: TasksViewModel = viewModel(factory = TasksViewModelFactory(application))
     val importantTasks by tasksViewModel.getTasksByTag("срочно").observeAsState(emptyList())
 
