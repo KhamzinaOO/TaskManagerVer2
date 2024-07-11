@@ -69,6 +69,11 @@ dependencies {
     implementation("com.google.accompanist:accompanist-permissions:0.20.3")
     implementation("androidx.compose.foundation:foundation:1.3.1")
 
+//    implementation ("androidx.compose.ui:ui:1.0.0")
+    implementation ("androidx.compose.material:material:1.0.0")
+
+    implementation("com.google.accompanist:accompanist-systemuicontroller:0.30.0")
+
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

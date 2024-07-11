@@ -20,8 +20,20 @@ data class TasksDbEntity(
     @PrimaryKey(autoGenerate = true) val taskId: Int = 0,
     @ColumnInfo val title: String,
     @ColumnInfo val content: String,
-    //@ColumnInfo val date: Date = Date(),
-    //@ColumnInfo val deadline: Date? = null,
-    @ColumnInfo val tag : String,
-    @ColumnInfo val status : String
-): Parcelable
+    @ColumnInfo val tag: String,
+    @ColumnInfo val status: String,
+    @ColumnInfo val dateOfCreation: Date? = null,
+    @ColumnInfo val deadline: Date? = null
+) : Parcelable
+
+class Converters {
+    @TypeConverter
+    fun fromTimestamp(value: Long?): Date? {
+        return value?.let { Date(it) }
+    }
+
+    @TypeConverter
+    fun dateToTimestamp(date: Date?): Long? {
+        return date?.time
+    }
+}

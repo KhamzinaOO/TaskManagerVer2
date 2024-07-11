@@ -1,6 +1,8 @@
 package com.example.taskmanagerver2.view
 
 import android.app.Application
+import android.app.DatePickerDialog
+import android.app.TimePickerDialog
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -65,6 +67,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -77,12 +80,9 @@ import com.example.taskmanagerver2.model.TagAndColor
 import com.example.taskmanagerver2.model.database.TasksDbEntity
 import com.example.taskmanagerver2.viewmodel.TasksViewModel
 import com.example.taskmanagerver2.viewmodel.TasksViewModelFactory
+import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
-
-class Tag(
-    tag:String,
-    color: Color
-)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -98,19 +98,18 @@ fun TaskListScreen(application: Application,
     val tasksByStatus by tasksViewModel.getTasksByStatus(statusFromButton).observeAsState(emptyList())
     val tasksByTag by tasksViewModel.getTasksByTag(tagsFromButton).observeAsState(emptyList())
 
-
     var itemName by remember { mutableStateOf("") }
     var itemContent by remember { mutableStateOf("") }
+    var dateOfCreation: Date? by remember { mutableStateOf(null) }
     var deadline: Date? by remember { mutableStateOf(null) }
     var status by remember { mutableStateOf("В работе") }
-    val tagsList = remember { mutableStateListOf<String>()}
+    val tagsList = remember { mutableStateListOf<String>() }
     var showDialog by remember { mutableStateOf(false) }
     var tagExpanded by remember { mutableStateOf(false) }
     var statusExpanded by remember { mutableStateOf(false) }
 
     val statusColorList = Constants.statusColorList
     val tagColorList = Constants.tagColorList
-
 
     Column(
         modifier = Modifier
@@ -137,7 +136,7 @@ fun TaskListScreen(application: Application,
                 FilterChip(
                     modifier = Modifier.padding(3.dp),
                     onClick = {
-                        selectedStatus = if(selectedStatus == item.name) "" else item.name
+                        selectedStatus = if (selectedStatus == item.name) "" else item.name
                         statusFromButton = if (selectedStatus == item.name) item.name else ""
                     },
                     label = {
@@ -171,7 +170,7 @@ fun TaskListScreen(application: Application,
                 FilterChip(
                     modifier = Modifier.padding(3.dp),
                     onClick = {
-                        isSelectedTag = if(isSelectedTag == item.name) "" else item.name
+                        isSelectedTag = if (isSelectedTag == item.name) "" else item.name
                         tagsFromButton = if (isSelectedTag == item.name) item.name else ""
                     },
                     label = {
@@ -199,16 +198,16 @@ fun TaskListScreen(application: Application,
                 .fillMaxSize()
                 .padding(16.dp)
         ) {
-            items(if(statusFromButton !="" && tagsFromButton !="") tasksByStatus.intersect(tasksByTag).toList()
-            else if(statusFromButton !="") tasksByStatus else if (tagsFromButton !="") tasksByTag
+            items(if (statusFromButton != "" && tagsFromButton != "") tasksByStatus.intersect(tasksByTag).toList()
+            else if (statusFromButton != "") tasksByStatus else if (tagsFromButton != "") tasksByTag
             else taskList) { item ->
                 TaskListItem(
                     item = item,
-                    onDeleteClick = {tasksViewModel.deleteTask(item) },
-                    onTagClick =  {
-                        tag -> tagsFromButton = tag
+                    onDeleteClick = { tasksViewModel.deleteTask(item) },
+                    onTagClick = {
+                            tag -> tagsFromButton = tag
                         isSelectedTag = tag
-                                  },
+                    },
                     tagColorList,
                     statusColorList,
                     navigateToDetail
@@ -217,183 +216,298 @@ fun TaskListScreen(application: Application,
         }
 
         if (showDialog) {
-            AlertDialog(
-                onDismissRequest = {
+            TaskDialog(
+                itemName = itemName,
+                itemContent = itemContent,
+                status = status,
+                tagsList = tagsList,
+                deadline = deadline,
+                onItemNameChange = { itemName = it },
+                onItemContentChange = { itemContent = it },
+                onStatusChange = { status = it },
+                onTagAdd = { tag -> tagsList.add(tag) },
+                onTagRemove = { tag -> tagsList.remove(tag) },
+                onDismiss = { showDialog = false },
+                onConfirm = {
+                    dateOfCreation = Date()
+                    tasksViewModel.insertTask(
+                        TasksDbEntity(
+                            title = itemName,
+                            content = itemContent,
+                            status = status,
+                            tag = if (tagsList.isNotEmpty()) tagsList.joinToString(separator = ",") else "none",
+                            dateOfCreation = dateOfCreation,
+                            deadline = deadline
+                        )
+                    )
                     showDialog = false
+                    itemName = ""
+                    itemContent = ""
                     status = "В работе"
-                    tagsList.removeAll(tagsList)
-                                   },
-                confirmButton = {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceAround
-                    ) {
-                        Button(
-                            onClick = {
-                            if (itemName.isNotBlank() || itemContent.isNotBlank()) {
-                                tasksViewModel.insertTask(
-                                    TasksDbEntity(
-                                        title = itemName,
-                                        content = itemContent,
-                                        status = status,
-                                        tag = if(tagsList.isNotEmpty()) tagsList.joinToString(separator = ",") else "none"
-                                    )
-                                )
-                                showDialog = false
-                                itemName = ""
-                                itemContent = ""
-                                status = "В работе"
-                                tagsList.removeAll(tagsList)
-                            }
-                        }) {
-                            Text("Добавить")
-                        }
-                        Button(onClick = {
-                            showDialog = false
-                            tagsList.removeAll(tagsList)
-                        }) {
-                            Text("Отменить")
-                        }
-                    }
+                    tagsList.clear()
                 },
-                title = { Text("Добавить задачу:") },
-                text = {
-                    Column {
-                        OutlinedTextField(
-                            value = itemName,
-                            onValueChange = { itemName = it },
-                            singleLine = true,
-                            placeholder = { Text("Задача") },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(8.dp)
-                        )
-                        OutlinedTextField(
-                            value = itemContent,
-                            onValueChange = { itemContent = it },
-                            singleLine = false,
-                            minLines = 4,
-                            placeholder = { Text("Описание..") },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(8.dp)
-                                .width(500.dp)
-                        )
-                        Box {
-                            Row(
-                                Modifier
-                                    .padding(8.dp)
-                                    .border(
-                                        width = 1.dp,
-                                        color = Color.Gray,
-                                        shape = RoundedCornerShape(3.dp)
-                                    )
-                                    .fillMaxWidth()
-                                    .padding(8.dp)
-                                    .clickable { tagExpanded = true },
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ){
-                                Text("Тэги: ",
-                                    fontSize = 16.sp)
-
-                                val columns = 2
-
-                                LazyVerticalStaggeredGrid(
-                                    columns = StaggeredGridCells.Fixed(columns),
-                                    modifier = Modifier.width(155.dp),
-                                ) {
-                                    items(tagsList) { item ->
-                                        tagColorList.find { it.name == item }?.color?.let { color ->
-                                            Box(
-                                                modifier = Modifier
-                                                    .padding(1.dp)
-                                                    .background(
-                                                        color = color,
-                                                        shape = RoundedCornerShape(20.dp)
-                                                    )
-                                                    .border(
-                                                        border = BorderStroke(1.dp, Color.DarkGray),
-                                                        shape = RoundedCornerShape(20.dp)
-                                                    )
-                                                    .padding(8.dp, 4.dp)
-                                                    .wrapContentWidth()
-                                                    .clickable { tagsList.remove(item) },
-                                                contentAlignment = Alignment.Center
-                                            ) {
-                                                Text(
-                                                    item,
-                                                    fontSize = 10.sp
-                                                )
-                                            }
-                                        }
-                                    }
-                                }
-                                IconButton(onClick = { tagExpanded = true }) {
-                                    Icon(imageVector = Icons.Default.KeyboardArrowDown, contentDescription = "arrowdown")}
-                                }
-
-                            DropdownMenu(
-                                expanded = tagExpanded,
-                                onDismissRequest = { tagExpanded = false },
-                                offset = DpOffset(x = 150.dp, y = 0.dp)
-                            ) {
-                                for(item in tagColorList.dropLast(1)){
-                                    DropdownMenuItem(
-                                        text = { Text(item.name, fontSize=18.sp, modifier = Modifier.padding(10.dp)) },
-                                        onClick = {
-                                            if(!tagsList.contains(item.name)){
-                                                tagsList.add(item.name)
-                                            }
-                                        }
-                                    )
-                                }
-                            }
-                        }
-                        Box {
-                            Row(
-                                Modifier
-                                    .padding(8.dp)
-                                    .border(
-                                        width = 1.dp,
-                                        color = Color.Gray,
-                                        shape = RoundedCornerShape(3.dp)
-                                    )
-                                    .fillMaxWidth()
-                                    .padding(8.dp)
-                                    .clickable { statusExpanded = true },
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ){
-                                Text("Статус: ",
-                                    fontSize = 16.sp)
-                                Text(
-                                    text = status,
-                                    fontSize = 16.sp
-                                )
-                                IconButton(onClick = { statusExpanded = true }) {
-                                    Icon(imageVector = Icons.Default.KeyboardArrowDown, contentDescription = "arrowdown")}
-                            }
-                            DropdownMenu(
-                                expanded = statusExpanded,
-                                onDismissRequest = { statusExpanded = false },
-                                offset = DpOffset(x = 130.dp, y = 0.dp)
-                            ) {
-                                for(item in statusColorList){
-                                    DropdownMenuItem(
-                                        text = { Text(item.name, fontSize=18.sp, modifier = Modifier.padding(10.dp)) },
-                                        onClick = { status = item.name }
-                                    )
-                                }
-                            }
-                        }
-
-                    }
-                }
+                tagColorList = tagColorList,
+                statusColorList = statusColorList
             )
         }
     }
+}
+
+@Composable
+fun TaskDialog(
+    itemName: String,
+    itemContent: String,
+    status: String,
+    tagsList: SnapshotStateList<String>,
+    deadline: Date?,
+    onItemNameChange: (String) -> Unit,
+    onItemContentChange: (String) -> Unit,
+    onStatusChange: (String) -> Unit,
+    onTagAdd: (String) -> Unit,
+    onTagRemove: (String) -> Unit,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit,
+    tagColorList: List<TagAndColor>,
+    statusColorList: List<TagAndColor>
+) {
+    var tagExpanded by remember { mutableStateOf(false) }
+    var statusExpanded by remember { mutableStateOf(false) }
+    var deadlineDialogShown by remember { mutableStateOf(false) }
+    var selectedDate by remember { mutableStateOf<Date?>(null) }
+
+    if (deadlineDialogShown) {
+        DateTimePickerDialog(
+            initialDate = selectedDate ?: Date(),
+            onDismissRequest = { deadlineDialogShown = false },
+            onDateTimeSelected = { date ->
+                selectedDate = date
+                deadlineDialogShown = false
+            }
+        )
+    }
+
+    AlertDialog(
+        onDismissRequest = {
+            onDismiss()
+        },
+        confirmButton = {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceAround
+            ) {
+                Button(
+                    onClick = {
+                        if (itemName.isNotBlank() || itemContent.isNotBlank()) {
+                            onConfirm()
+                        }
+                    }) {
+                    Text("Добавить")
+                }
+                Button(onClick = {
+                    onDismiss()
+                    tagsList.clear()
+                }) {
+                    Text("Отменить")
+                }
+            }
+        },
+        title = { Text("Добавить задачу:") },
+        text = {
+            Column {
+                OutlinedTextField(
+                    value = itemName,
+                    onValueChange = onItemNameChange,
+                    singleLine = true,
+                    placeholder = { Text("Задача") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp)
+                )
+                OutlinedTextField(
+                    value = itemContent,
+                    onValueChange = onItemContentChange,
+                    singleLine = false,
+                    minLines = 4,
+                    placeholder = { Text("Описание..") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp)
+                        .width(500.dp)
+                )
+                Box {
+                    Row(
+                        Modifier
+                            .padding(8.dp)
+                            .border(
+                                width = 1.dp,
+                                color = Color.Gray,
+                                shape = RoundedCornerShape(3.dp)
+                            )
+                            .fillMaxWidth()
+                            .padding(8.dp)
+                            .clickable { tagExpanded = true },
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text("Тэги: ",
+                            fontSize = 16.sp)
+
+                        val columns = 2
+
+                        LazyVerticalStaggeredGrid(
+                            columns = StaggeredGridCells.Fixed(columns),
+                            modifier = Modifier.width(155.dp),
+                        ) {
+                            items(tagsList) { item ->
+                                tagColorList.find { it.name == item }?.color?.let { color ->
+                                    Box(
+                                        modifier = Modifier
+                                            .padding(1.dp)
+                                            .background(
+                                                color = color,
+                                                shape = RoundedCornerShape(20.dp)
+                                            )
+                                            .border(
+                                                border = BorderStroke(1.dp, Color.DarkGray),
+                                                shape = RoundedCornerShape(20.dp)
+                                            )
+                                            .padding(8.dp, 4.dp)
+                                            .wrapContentWidth()
+                                            .clickable { onTagRemove(item) },
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            item,
+                                            fontSize = 10.sp
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                        IconButton(onClick = { tagExpanded = true }) {
+                            Icon(imageVector = Icons.Default.KeyboardArrowDown, contentDescription = "arrowdown")
+                        }
+                    }
+
+                    DropdownMenu(
+                        expanded = tagExpanded,
+                        onDismissRequest = { tagExpanded = false },
+                        offset = DpOffset(x = 150.dp, y = 0.dp)
+                    ) {
+                        for (item in tagColorList.dropLast(1)) {
+                            DropdownMenuItem(
+                                text = { Text(item.name, fontSize = 18.sp, modifier = Modifier.padding(10.dp)) },
+                                onClick = {
+                                    if (!tagsList.contains(item.name)) {
+                                        onTagAdd(item.name)
+                                    }
+                                }
+                            )
+                        }
+                    }
+                }
+                Box {
+                    Row(
+                        Modifier
+                            .padding(8.dp)
+                            .border(
+                                width = 1.dp,
+                                color = Color.Gray,
+                                shape = RoundedCornerShape(3.dp)
+                            )
+                            .fillMaxWidth()
+                            .padding(8.dp)
+                            .clickable { statusExpanded = true },
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text("Статус: ",
+                            fontSize = 16.sp)
+                        Text(
+                            text = status,
+                            fontSize = 16.sp
+                        )
+                        IconButton(onClick = { statusExpanded = true }) {
+                            Icon(imageVector = Icons.Default.KeyboardArrowDown, contentDescription = "arrowdown")
+                        }
+                    }
+                    DropdownMenu(
+                        expanded = statusExpanded,
+                        onDismissRequest = { statusExpanded = false },
+                        offset = DpOffset(x = 130.dp, y = 0.dp)
+                    ) {
+                        for (item in statusColorList) {
+                            DropdownMenuItem(
+                                text = { Text(item.name, fontSize = 18.sp, modifier = Modifier.padding(10.dp)) },
+                                onClick = { onStatusChange(item.name) }
+                            )
+                        }
+                    }
+                }
+
+                Box {
+                    Row(
+                        Modifier
+                            .padding(8.dp)
+                            .border(
+                                width = 1.dp,
+                                color = Color.Gray,
+                                shape = RoundedCornerShape(3.dp)
+                            )
+                            .fillMaxWidth()
+                            .padding(8.dp)
+                            .clickable { deadlineDialogShown = true },
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text("Дедлайн: ",
+                            fontSize = 16.sp)
+                        Text(
+                            text = selectedDate?.let { SimpleDateFormat("dd/MM/yyyy HH:mm").format(it) } ?: "Не установлен",
+                            fontSize = 16.sp
+                        )
+                        IconButton(onClick = { deadlineDialogShown = true }) {
+                            Icon(imageVector = Icons.Default.KeyboardArrowDown, contentDescription = "arrowdown")
+                        }
+                    }
+                }
+            }
+        }
+    )
+}
+
+@Composable
+fun DateTimePickerDialog(
+    initialDate: Date,
+    onDismissRequest: () -> Unit,
+    onDateTimeSelected: (Date) -> Unit
+) {
+    val context = LocalContext.current
+    val calendar = Calendar.getInstance().apply { time = initialDate }
+
+    DatePickerDialog(
+        context,
+        { _, year, month, dayOfMonth ->
+            calendar.set(year, month, dayOfMonth)
+            TimePickerDialog(
+                context,
+                { _, hourOfDay, minute ->
+                    calendar.set(Calendar.HOUR_OF_DAY, hourOfDay)
+                    calendar.set(Calendar.MINUTE, minute)
+                    onDateTimeSelected(calendar.time)
+                },
+                calendar.get(Calendar.HOUR_OF_DAY),
+                calendar.get(Calendar.MINUTE),
+                true
+            ).show()
+        },
+        calendar.get(Calendar.YEAR),
+        calendar.get(Calendar.MONTH),
+        calendar.get(Calendar.DAY_OF_MONTH)
+    ).apply {
+        setOnDismissListener { onDismissRequest() }
+    }.show()
 }
 
 @Composable
@@ -528,6 +642,32 @@ fun TaskListItem(
                 overflow = TextOverflow.Ellipsis,
                 fontSize = 12.sp
             )
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth()
+                    .padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ){
+            Text("Последнее изменение:")
+            Text(
+                text = item.dateOfCreation?.let { SimpleDateFormat("dd/MM/yyyy HH:mm").format(it) } ?: "None",
+                fontSize = 12.sp
+            )
+
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth()
+                .padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ){
+            Text("Дедлайн:")
+            Text(
+                text = item.deadline?.let { SimpleDateFormat("dd/MM/yyyy HH:mm").format(it) } ?: "Не установлен",
+                fontSize = 12.sp
+            )
+
         }
     }
 }

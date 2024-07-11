@@ -65,6 +65,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
+import java.text.SimpleDateFormat
 import java.util.Date
 
 @Composable
@@ -85,7 +86,7 @@ fun ContentScreen(
 
     var itemName by remember { mutableStateOf(item.title) }
     var itemContent by remember { mutableStateOf(item.content) }
-    var deadline: Date? by remember { mutableStateOf(null) }
+    val deadline: Date? by remember { mutableStateOf(null) }
     var status by remember { mutableStateOf(item.status) }
     val tagsList = remember { mutableStateListOf<String>() }
     var showDialog by remember { mutableStateOf(false) }
@@ -109,6 +110,20 @@ fun ContentScreen(
     }
 
     var isSuccess by remember { mutableStateOf<Boolean?>(null) }
+
+    var deadlineDialogShown by remember { mutableStateOf(false) }
+    var selectedDate by remember { mutableStateOf<Date?>(null) }
+
+    if (deadlineDialogShown) {
+        DateTimePickerDialog(
+            initialDate = selectedDate ?: Date(),
+            onDismissRequest = { deadlineDialogShown = false },
+            onDateTimeSelected = { date ->
+                selectedDate = date
+                deadlineDialogShown = false
+            }
+        )
+    }
 
     LaunchedEffect(isSuccess) {
         isSuccess?.let {
@@ -274,6 +289,33 @@ fun ContentScreen(
                 }
             }
         }
+        Box {
+            Row(
+                Modifier
+                    .padding(8.dp)
+                    .border(
+                        width = 1.dp,
+                        color = Color.Gray,
+                        shape = RoundedCornerShape(3.dp)
+                    )
+                    .fillMaxWidth()
+                    .padding(8.dp)
+                    .clickable { deadlineDialogShown = true },
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text("Дедлайн: ",
+                    fontSize = 16.sp)
+                Text(
+                    text = selectedDate?.let { SimpleDateFormat("dd/MM/yyyy HH:mm").format(it) } ?: "Не установлен",
+                    fontSize = 16.sp
+                )
+                IconButton(onClick = { deadlineDialogShown = true }) {
+                    Icon(imageVector = Icons.Default.KeyboardArrowDown, contentDescription = "arrowdown")
+                }
+            }
+        }
+
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceAround
@@ -285,7 +327,9 @@ fun ContentScreen(
                         title = itemName,
                         content = itemContent,
                         status = status,
-                        tag = if (tagsList.isNotEmpty()) tagsList.joinToString(separator = ",") else "none"
+                        tag = if (tagsList.isNotEmpty()) tagsList.joinToString(separator = ",") else "none",
+                        dateOfCreation = Date(),
+                        deadline = selectedDate
                     )
                 )
                 Toast.makeText(application, "задача изменена", Toast.LENGTH_LONG).show()

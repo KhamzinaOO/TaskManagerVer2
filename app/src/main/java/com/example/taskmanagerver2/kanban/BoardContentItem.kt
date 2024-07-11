@@ -54,7 +54,8 @@ fun BoardContentItem(
     modifier: Modifier = Modifier,
     boardItem: TasksDbEntity,
     isExpanded: Boolean,
-    listState: LazyListState
+    listState: LazyListState,
+    navigateToDetail: (TasksDbEntity) -> Unit
 ) {
     val tagsList = boardItem.tag.split(",").map { it.trim() }
     DragTarget(
@@ -63,19 +64,20 @@ fun BoardContentItem(
         listState = listState
     ) {
         val color = tagColorList.find { it.name == tagsList[0] }?.color
-
-        if (isExpanded) {
-            ExpandedItem(boardItem, tagsList)
-        } else {
-            ItemHeading(boardItem, tagsList)
-        }
+// изменение вида при изменении окна - не используется
+//        if (isExpanded) {
+//            ExpandedItem(boardItem, tagsList)
+//        } else {
+            ItemHeading(boardItem, tagsList, navigateToDetail)
+//        }
     }
 }
 
 @Composable
 fun ItemHeading(
     task: TasksDbEntity,
-    tagsList : List<String>
+    tagsList : List<String>,
+    navigateToDetail: (TasksDbEntity) -> Unit
 ){
 
     val color = tagColorList.find { it.name == tagsList[0] }?.color
@@ -83,25 +85,28 @@ fun ItemHeading(
     Row(
         Modifier
             .wrapContentSize()
-            .background(color ?: Color.White, RoundedCornerShape(4.dp, 4.dp))
-            .border(BorderStroke(1.dp, Color.DarkGray), RoundedCornerShape(4.dp, 4.dp))
+            .background(color ?: Color.White)
+            .border(BorderStroke(1.dp, Color.DarkGray))
             .clickable {
+                navigateToDetail
             },
         horizontalArrangement = Arrangement.Center,
         verticalAlignment = Alignment.CenterVertically
     ){
         Text(task.title,
             fontSize = 24.sp,
+            textAlign = TextAlign.Center,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.padding(4.dp,2.dp))
     }
 }
 
-
+//Не используется
 @Composable
 fun ExpandedItem(
     task: TasksDbEntity,
-    tagsList : List<String>
+    tagsList : List<String>,
+    navigateToDetail: (TasksDbEntity) -> Unit
 ){
     var lines by remember { mutableIntStateOf(1) }
     var arrowIcon by remember { mutableStateOf(Icons.Default.KeyboardArrowDown) }
@@ -111,7 +116,7 @@ fun ExpandedItem(
             .padding(8.dp)
             .border(BorderStroke(1.dp, Color.DarkGray), RoundedCornerShape(4.dp, 4.dp))
     ){
-        ItemHeading(task = task, tagsList)
+        ItemHeading(task = task, tagsList, navigateToDetail)
         Column(
 
         ) {
