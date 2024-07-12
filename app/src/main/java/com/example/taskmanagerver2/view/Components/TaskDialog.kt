@@ -38,7 +38,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.taskmanagerver2.model.TagAndColor
+import com.example.taskmanagerver2.view.Components.StringConstants.mainFontSize
+import com.example.taskmanagerver2.view.Components.StringConstants.mediumFontSize
+import com.example.taskmanagerver2.view.Components.StringConstants.secondaryFontSize
 import java.text.SimpleDateFormat
 import java.util.Date
 
@@ -140,7 +142,7 @@ fun TaskDialog(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text("Тэги: ",
-                            fontSize = 16.sp)
+                            fontSize = mainFontSize)
 
                         val columns = 2
 
@@ -168,7 +170,7 @@ fun TaskDialog(
                                     ) {
                                         Text(
                                             item,
-                                            fontSize = 10.sp
+                                            fontSize = secondaryFontSize
                                         )
                                     }
                                 }
@@ -186,7 +188,7 @@ fun TaskDialog(
                     ) {
                         for (item in tagColorList.dropLast(1)) {
                             DropdownMenuItem(
-                                text = { Text(item.name, fontSize = 18.sp, modifier = Modifier.padding(10.dp)) },
+                                text = { Text(item.name, fontSize = mainFontSize, modifier = Modifier.padding(10.dp)) },
                                 onClick = {
                                     if (!tagsList.contains(item.name)) {
                                         onTagAdd(item.name)
@@ -212,10 +214,10 @@ fun TaskDialog(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text("Статус: ",
-                            fontSize = 16.sp)
+                            fontSize = mainFontSize)
                         Text(
                             text = status,
-                            fontSize = 16.sp
+                            fontSize = mainFontSize
                         )
                         IconButton(onClick = { statusExpanded = true }) {
                             Icon(imageVector = Icons.Default.KeyboardArrowDown, contentDescription = "arrowdown")
@@ -228,7 +230,7 @@ fun TaskDialog(
                     ) {
                         for (item in statusColorList) {
                             DropdownMenuItem(
-                                text = { Text(item.name, fontSize = 18.sp, modifier = Modifier.padding(10.dp)) },
+                                text = { Text(item.name, fontSize = mediumFontSize, modifier = Modifier.padding(10.dp)) },
                                 onClick = { onStatusChange(item.name) }
                             )
                         }
@@ -251,10 +253,10 @@ fun TaskDialog(
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text("Дедлайн: ",
-                            fontSize = 16.sp)
+                            fontSize = mainFontSize)
                         Text(
                             text = selectedDate?.let { SimpleDateFormat("dd/MM/yyyy HH:mm").format(it) } ?: "Не установлен",
-                            fontSize = 16.sp
+                            fontSize = mainFontSize
                         )
                         IconButton(onClick = { deadlineDialogShown = true }) {
                             Icon(imageVector = Icons.Default.KeyboardArrowDown, contentDescription = "arrowdown")

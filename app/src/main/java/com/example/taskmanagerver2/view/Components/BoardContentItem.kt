@@ -41,8 +41,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.taskmanagerver2.model.Constants.tagColorList
+import com.example.taskmanagerver2.view.Components.Constants.tagColorList
 import com.example.taskmanagerver2.model.database.TasksDbEntity
+import com.example.taskmanagerver2.view.Components.StringConstants.largeTextSize
+import com.example.taskmanagerver2.view.Components.StringConstants.smallTextSize
 
 @Composable
 fun BoardContentItem(
@@ -89,7 +91,7 @@ fun ItemHeading(
         verticalAlignment = Alignment.CenterVertically
     ){
         Text(task.title,
-            fontSize = 24.sp,
+            fontSize = largeTextSize,
             textAlign = TextAlign.Center,
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier.padding(4.dp,2.dp))
@@ -128,7 +130,7 @@ fun ExpandedItem(
                     modifier = Modifier.wrapContentWidth(),
                     maxLines = lines,
                     overflow = TextOverflow.Ellipsis,
-                    fontSize = 24.sp
+                    fontSize = largeTextSize
                 )
                 IconButton(
                     modifier = Modifier.size(10.dp),
@@ -177,7 +179,7 @@ fun ExpandedItem(
                             ) {
                                 Text(
                                     tag,
-                                    fontSize = 5.sp,
+                                    fontSize = smallTextSize,
                                     fontWeight = FontWeight.Bold
                                 )
                             }

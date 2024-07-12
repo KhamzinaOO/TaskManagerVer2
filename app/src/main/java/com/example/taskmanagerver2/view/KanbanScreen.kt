@@ -32,7 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.taskmanagerver2.view.Components.SetOrientation
-import com.example.taskmanagerver2.model.Constants.statusColorList
+import com.example.taskmanagerver2.view.Components.Constants.statusColorList
 import com.example.taskmanagerver2.model.database.TasksDbEntity
 import com.example.taskmanagerver2.viewmodel.KanbanScreenViewModel
 import com.example.taskmanagerver2.viewmodel.TasksViewModel

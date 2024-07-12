@@ -45,7 +45,7 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.taskmanagerver2.model.Constants
+import com.example.taskmanagerver2.view.Components.Constants
 import com.example.taskmanagerver2.model.database.TasksDbEntity
 import com.example.taskmanagerver2.view.Components.DateTimePickerDialog
 import com.example.taskmanagerver2.view.Components.SetOrientation

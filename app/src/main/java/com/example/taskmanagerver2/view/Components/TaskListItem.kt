@@ -5,18 +5,11 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
-import androidx.compose.foundation.lazy.staggeredgrid.items
-import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
@@ -34,17 +27,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.taskmanagerver2.model.TagAndColor
 import com.example.taskmanagerver2.model.database.TasksDbEntity
 import java.text.SimpleDateFormat
 
 @Composable
 fun TaskListItem(
+    modifier: Modifier,
     item: TasksDbEntity,
     onDeleteClick: () -> Unit,
     onTagClick: (String) -> Unit,
@@ -90,7 +82,7 @@ fun TaskListItem(
                 ) {
                     Text(
                         item.status,
-                        fontSize = 12.sp
+                        fontSize = 16.sp
                     )
                 }
             }
@@ -101,48 +93,14 @@ fun TaskListItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             val tagsList = item.tag.split(",").map { it.trim() }
-            val gridState = rememberLazyStaggeredGridState()
 
-            Box(
-                modifier = Modifier
-                    .padding(start = 16.dp)
-                    .width(180.dp)
-                    .heightIn(30.dp, 100.dp)
-            ) {
-                LazyVerticalStaggeredGrid(
-                    columns = StaggeredGridCells.Fixed(2),
-                    modifier = Modifier.wrapContentWidth(),
-                    state = gridState,
-                    horizontalArrangement = Arrangement.Start,
-                    verticalItemSpacing = 2.dp,
-                ) {
-                    items(tagsList) { tag ->
-                        tagColorList.find { it.name == tag }?.let { tagColor ->
-                            Box(
-                                modifier = Modifier
-                                    .padding(2.dp)
-                                    .background(
-                                        color = tagColor.color,
-                                        shape = RoundedCornerShape(20.dp)
-                                    )
-                                    .border(
-                                        border = BorderStroke(1.dp, Color.DarkGray),
-                                        shape = RoundedCornerShape(20.dp)
-                                    )
-                                    .padding(8.dp, 4.dp)
-                                    .clickable { onTagClick(tag) },
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    tag,
-                                    fontSize = 10.sp,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
-                        }
-                    }
-                }
+            LazyGridContainer(
+                Modifier,
+                elements = tagsList,
+                columns = StaggeredGridCells.Fixed(2),
+                tagAndColorList = tagColorList) {
             }
+
             Row {
                 IconButton(onClick = { onDeleteClick() }) {
                     Icon(imageVector = Icons.Default.Delete, contentDescription = "delete")
@@ -177,7 +135,8 @@ fun TaskListItem(
             )
         }
         Row(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
                 .padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
@@ -190,7 +149,8 @@ fun TaskListItem(
 
         }
         Row(
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
                 .padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically

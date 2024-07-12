@@ -1,4 +1,4 @@
-package com.example.taskmanagerver2.model
+package com.example.taskmanagerver2.view.Components
 
 import androidx.compose.ui.graphics.Color
 

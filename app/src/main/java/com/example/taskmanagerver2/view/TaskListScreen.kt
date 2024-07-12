@@ -32,7 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.taskmanagerver2.model.Constants
+import com.example.taskmanagerver2.view.Components.Constants
 import com.example.taskmanagerver2.model.database.TasksDbEntity
 import com.example.taskmanagerver2.view.Components.SetOrientation
 import com.example.taskmanagerver2.view.Components.TaskDialog
@@ -160,6 +160,7 @@ fun TaskListScreen(application: Application,
             else if (statusFromButton != "") tasksByStatus else if (tagsFromButton != "") tasksByTag
             else taskList) { item ->
                 TaskListItem(
+                    Modifier,
                     item = item,
                     onDeleteClick = { tasksViewModel.deleteTask(item) },
                     onTagClick = {

@@ -2,33 +2,30 @@ package com.example.taskmanagerver2.view
 
 import android.app.Application
 import android.content.pm.ActivityInfo
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.taskmanagerver2.model.Constants
-import com.example.taskmanagerver2.model.TagAndColor
+import com.example.taskmanagerver2.view.Components.Constants
+import com.example.taskmanagerver2.view.Components.TagAndColor
 import com.example.taskmanagerver2.model.database.TasksDbEntity
+import com.example.taskmanagerver2.view.Components.RoundCornerBox
 import com.example.taskmanagerver2.view.Components.SetOrientation
 import com.example.taskmanagerver2.view.Components.TaskListItem
 import com.example.taskmanagerver2.viewmodel.TasksViewModel
@@ -71,34 +68,28 @@ fun DashboardScreen(application: Application,
             ) {
                 items(statusColorList.size) { index ->
                     val item = statusColorList[index]
-                    Box(
+                    RoundCornerBox(
                         modifier = Modifier
-                            .padding(8.dp)
-                            .height(itemHeight)
-                            .border(
-                                1.dp,
-                                Color.DarkGray,
-                                RoundedCornerShape(15.dp)
-                            )
-                            .background(
-                                item.color,
-                                RoundedCornerShape(15.dp)
-                            )
-                            .clickable { navigateToStatus(if (item.name == "Все") "" else item.name) }
-                    )
-                    {
+                            .fillMaxWidth()
+                            .wrapContentHeight()
+                            .padding(8.dp),
+                        color = item.color,
+                        cornerSize = 4.dp,
+                        onClickAction = { navigateToStatus(if (item.name == "Все") "" else item.name) },
+                        contentAlignment = Alignment.BottomStart
+                        ){
                         Column(
-                            modifier = Modifier.padding(start = 16.dp, 8.dp)
+                            modifier = Modifier.padding(start = 16.dp, 8.dp, 8.dp, 8.dp)
                         ) {
                             Text(
-                                fontSize = 24.sp,
+                                fontSize = 25.sp,
                                 text = if(item.name=="Все") tasksViewModel.getCount().observeAsState(0).value.toString()
                                 else tasksViewModel.getCountByStatus(item.name).observeAsState(0).value.toString()
                             )
                             Text(
-                                modifier = Modifier.padding(top = 4.dp),
+                                modifier = Modifier,
                                 text = item.name,
-                                fontSize = 20.sp,
+                                fontSize = 22.sp,
                                 color = Color.Black
                             )
                         }
@@ -117,6 +108,7 @@ fun DashboardScreen(application: Application,
             items(importantTasks){
                     item ->
                 TaskListItem(
+                    Modifier,
                     item,
                     onTagClick = {},
                     onDeleteClick = {tasksViewModel.deleteTask(item) },
